@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using Newtonsoft.Json;
+using System.IO;
 using System.Net;
 using System.Web.Services;
+using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// StockPrice Web Service
@@ -42,10 +44,16 @@ public class StockPrice : WebService
 
         if (responseSteam == null) return "";
 
-        // Read the response stream and return a trimmer version
+        // Read the response stream and store a trimmed version
         var sr = new StreamReader(responseSteam);
+        var response = sr.ReadToEnd().Trim();
 
-        return sr.ReadToEnd().Trim();
+        // Access the regularMarketPrice field
+        var rootObject = JObject.Parse(response);
+        var metaObject = rootObject["chart"]?["result"]?[0]?["meta"];
+        var regularMarketPrice = metaObject?["regularMarketPrice"]?.ToString();
+        var regularMarketTime = metaObject?["regularMarketTime"]?.ToString();
 
+        return regularMarketPrice + "|" + regularMarketTime;
     }
 }
