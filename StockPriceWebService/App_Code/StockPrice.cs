@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Web.Services;
@@ -12,10 +12,10 @@ using Newtonsoft.Json.Linq;
 public class StockPrice : WebService
 {
     [WebMethod]
-    public string GetStockPrice(string symbol)
+    public StockPriceResponse GetStockPrice(string symbol)
     {
-        // If parameter is null, return an empty string
-        if (symbol == null) return "";
+        // If parameter is null, return null
+        if (symbol == null) return null;
 
         // Request the stock price from the API
         var sharePrice = RequestSharePrice(symbol);
@@ -29,7 +29,7 @@ public class StockPrice : WebService
     /// </summary>
     /// <param name="symbol">The symbol for which to search</param>
     /// <returns>The current share price for the supplied symbol</returns>
-    public static string RequestSharePrice(string symbol)
+    public static StockPriceResponse RequestSharePrice(string symbol)
     {
         // Construct the URL
         var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?interval=1d&range=1d";
@@ -39,21 +39,33 @@ public class StockPrice : WebService
         req.ContentType = "application/json; charset=utf-8";
         req.Method = "GET";
 
-        // Retrieve the response from the request, if null, return empty string
+        // Retrieve the response from the request, if null, return null
         var responseSteam = req.GetResponse().GetResponseStream();
 
-        if (responseSteam == null) return "";
+        if (responseSteam == null) return null;
 
         // Read the response stream and store a trimmed version
         var sr = new StreamReader(responseSteam);
         var response = sr.ReadToEnd().Trim();
 
-        // Access the regularMarketPrice field
+        // Access the relevant fields from the JSON response (the current market price, currency and updated time)
         var rootObject = JObject.Parse(response);
         var metaObject = rootObject["chart"]?["result"]?[0]?["meta"];
-        var regularMarketPrice = metaObject?["regularMarketPrice"]?.ToString();
-        var regularMarketTime = metaObject?["regularMarketTime"]?.ToString();
+        var regularMarketPriceStr = metaObject?["regularMarketPrice"]?.ToString();
+        var regularMarketTimeStr = metaObject?["regularMarketTime"]?.ToString();
+        var stockCurrency = metaObject?["currency"]?.ToString().ToUpper();
 
-        return regularMarketPrice + "|" + regularMarketTime;
+        var regularMarketPrice = double.Parse(regularMarketPriceStr ?? string.Empty);
+        var regularMarketTime = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(regularMarketTimeStr)).DateTime;
+
+        // Construct the response object and return
+        var stockPriceResponse = new StockPriceResponse
+        {
+            StockPrice = regularMarketPrice,
+            StockCurrency = stockCurrency,
+            StockPriceTime = regularMarketTime,
+        };
+
+        return stockPriceResponse;
     }
 }
