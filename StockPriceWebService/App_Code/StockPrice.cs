@@ -11,24 +11,27 @@ using Newtonsoft.Json.Linq;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class StockPrice : WebService
 {
+    /// <summary>
+    /// Retrieve the share price information from the remote API and return
+    /// as a object containing the relevant values
+    /// </summary>
+    /// <param name="symbol">The symbol for which to search</param>
+    /// <returns>An object that contains the market price, update time and currency</returns>
     [WebMethod]
-    public StockPriceResponse GetStockPrice(string symbol)
+    public StockPriceResponse GetSharePrice(string symbol)
     {
         // If parameter is null, return null
         if (symbol == null) return null;
 
-        // Request the stock price from the API
-        var sharePrice = RequestSharePrice(symbol);
-
-        // Return the response string
-        return sharePrice;
+        // Request the stock price from the API and return
+        return RequestSharePrice(symbol);
     }
 
     /// <summary>
     /// Request the share price for the supplied symbol from the yahoo API
     /// </summary>
     /// <param name="symbol">The symbol for which to search</param>
-    /// <returns>The current share price for the supplied symbol</returns>
+    /// <returns>An object that contains the market price, update time and currency</returns>
     public static StockPriceResponse RequestSharePrice(string symbol)
     {
         // Construct the URL
