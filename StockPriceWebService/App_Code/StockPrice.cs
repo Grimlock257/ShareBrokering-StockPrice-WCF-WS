@@ -32,7 +32,7 @@ public class StockPrice : WebService
     /// </summary>
     /// <param name="symbol">The symbol for which to search</param>
     /// <returns>An object that contains the market price, update time and currency</returns>
-    public static StockPriceResponse RequestSharePrice(string symbol)
+    private static StockPriceResponse RequestSharePrice(string symbol)
     {
         // Construct the URL
         var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + symbol + "?interval=1d&range=1d";
