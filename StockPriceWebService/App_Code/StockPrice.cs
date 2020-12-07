@@ -56,7 +56,7 @@ public class StockPrice : WebService
         var metaObject = rootObject["chart"]?["result"]?[0]?["meta"];
         var regularMarketPriceStr = metaObject?["regularMarketPrice"]?.ToString();
         var regularMarketTimeStr = metaObject?["regularMarketTime"]?.ToString();
-        var stockCurrency = metaObject?["currency"]?.ToString().ToUpper();
+        var stockCurrency = metaObject?["currency"]?.ToString();
 
         var regularMarketPrice = double.Parse(regularMarketPriceStr ?? string.Empty);
         var regularMarketTime = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(regularMarketTimeStr)).DateTime;
